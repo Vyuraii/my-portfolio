@@ -1,154 +1,150 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ExternalLink, Github, ImageIcon, FolderOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import { playHoverSound } from '../utils/sound';
 
+// Import thumbnails so Vite bundles them correctly
+import mindcareImg from '../assets/thumbnail/mindcare.png';
+import portoImg from '../assets/thumbnail/porto.png';
+import stressCheckImg from '../assets/thumbnail/StressCheck.jpeg';
+import pendudukImg from '../assets/thumbnail/pendudukJABAR.png';
+import kemiskinanImg from '../assets/thumbnail/kemiskinanJABAR.png';
+
 const projects = [
   {
-      title: "MindCare AI Platform",
-  desc: "AI-powered mental health platform with stress assessment, journaling, personalized recommendations, and analytics.",
-  tech: [
-    "React",
-    "Tailwind CSS",
-    "Node.js",
-    "Express.js",
-    "MySQL",
-    "Sequelize",
-    "JWT",
-    "Python",
-    "Scikit-Learn",
-    "TensorFlow",
-    "Pandas",
-    "NumPy",
-    "Streamlit"
-  ],
-  github: "https://github.com/Lukmanul6305/capstone-project-mindcare",
-    image: "/assets/thumbnail/mindcare.png",
+    title: "MindCare AI Platform",
+    desc: "AI-powered mental health platform with stress assessment, journaling, personalized recommendations, and analytics.",
+    tech: ["React","Tailwind CSS","Node.js","Express.js","MySQL","Sequelize","JWT","Python","Scikit-Learn","TensorFlow","Pandas","NumPy","Streamlit"],
+    github: "https://github.com/Lukmanul6305/capstone-project-mindcare",
+    image: mindcareImg,
   },
   {
-  title: "Stress Check",
-  desc: "Mental wellness platform featuring AI stress analysis, mood tracking, and guided self-reflection.",
-  tech: [
-    "React",
-    "Vite",
-    "Tailwind CSS",
-    "Gemini AI",
-    "Face API.js"
-  ],
-  github: "https://github.com/Vyuraii/Stress-Check/",
-  image: "/assets/thumbnail/StressCheck.jpeg",
-},
+    title: "Personal Portfolio",
+    desc: "Futuristic portfolio website with 3D interactions, animated showcases, certification previews, and responsive cyberpunk-inspired design.",
+    tech: ["React","Vite","Tailwind CSS","Framer Motion","React PDF","PDF.js","Lucide React","React Icons","JavaScript"],
+    github: "https://github.com/Vyuraii/my-portfolio",
+    image: portoImg,
+  },
   {
-  title: "Analysis of Population Data for West Java (2019–2020)",
-  desc: "A Python-based population data analysis project for West Java that includes data exploration, interactive visualization, and a Streamlit dashboard to track population growth and sex ratios in each regency and city.",
-  tech: [
-    "Python",
-    "Pandas",
-    "NumPy",
-    "Matplotlib",
-    "Seaborn",
-    "Streamlit",
-    "Jupyter Notebook"
-  ],
-  github: "https://github.com/Vyuraii/analisis-penduduk-jabar",
-  image: "/assets/thumbnail/pendudukJABAR.png",
-},
+    title: "Stress Check",
+    desc: "Mental wellness platform featuring AI stress analysis, mood tracking, and guided self-reflection.",
+    tech: ["React","Vite","Tailwind CSS","Gemini AI","Face API.js"],
+    github: "https://github.com/Vyuraii/Stress-Check/",
+    image: stressCheckImg,
+  },
+  {
+    title: "Analysis of Population Data for West Java (2019 - 2020)",
+    desc: "Interactive population analytics dashboard for West Java built with Python and Streamlit.",
+    tech: ["Python","Pandas","NumPy","Matplotlib","Seaborn","Streamlit","Jupyter Notebook"],
+    github: "https://github.com/Vyuraii/analisis-penduduk-jabar",
+    image: pendudukImg,
+  },
+  {
+    title: "Analysis of the Poverty Line in West Java (2004–2025)",
+    desc: "Interactive poverty line dashboard for West Java with dynamic regional and year filtering.",
+    tech: ["Python","Pandas","Plotly","Streamlit"],
+    github: "https://github.com/username/dashboard-kemiskinan-jabar",
+    image: kemiskinanImg,
+  },
 ];
 
+function TechTooltip({ tech, anchorRef, visible }) {
+  const [pos, setPos] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (visible && anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setPos({
+        top: rect.top + window.scrollY - 8,
+        left: rect.left + window.scrollX,
+      });
+    }
+  }, [visible, anchorRef]);
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: 6, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 4, scale: 0.95 }}
+          transition={{ duration: 0.15 }}
+          style={{
+            position: 'fixed',
+            top: pos.top,
+            left: pos.left,
+            transform: 'translateY(-100%)',
+            zIndex: 9999,
+          }}
+          className="w-56 pointer-events-none"
+        >
+          <div className="rounded-xl border border-accent-cyan/30 bg-black/95 backdrop-blur-xl p-3 shadow-[0_0_30px_rgba(0,229,255,0.2)]">
+            <div className="text-[9px] font-mono uppercase tracking-widest text-accent-cyan mb-2">
+              Tech Stack
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {tech.map((t, i) => (
+                <span
+                  key={i}
+                  className="text-[10px] font-mono px-2 py-1 rounded bg-white/5 border border-white/10 text-slate-300"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function ProjectCard({ proj, idx, isDragging }) {
-  const [imgSrc, setImgSrc] = useState(proj.image || null);
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'application/pdf'];
-    if (!validTypes.includes(file.type)) return;
-    if (file.type === 'application/pdf') {
-      setImgSrc(null);
-    } else {
-      const url = URL.createObjectURL(file);
-      setImgSrc(url);
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleFileInput = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.type === 'application/pdf') {
-      setImgSrc(null);
-    } else {
-      const url = URL.createObjectURL(file);
-      setImgSrc(url);
-    }
-  };
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const badgeRef = useRef(null);
 
   return (
     <motion.div
-  initial={{ opacity: 0, y: 50, scale: 0.95 }}
-  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-  viewport={{ once: true, margin: '-50px' }}
-  transition={{ delay: idx * 0.15 }}
-  onMouseEnter={playHoverSound}
-  whileHover={!isDragging ? {
-    y: -10,
-    scale: 1.03,
-    transition: { type: 'spring', stiffness: 300, damping: 10 }
-  } : {}}
-  className="glass-card rounded-xl border border-white/5 neon-border-purple flex flex-col justify-between group relative overflow-visible"
->
+      initial={{ opacity: 0, y: 50, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ delay: idx * 0.15 }}
+      onMouseEnter={playHoverSound}
+      whileHover={!isDragging ? {
+        y: -10,
+        scale: 1.03,
+        transition: { type: 'spring', stiffness: 300, damping: 10 }
+      } : {}}
+      className="glass-card rounded-xl border border-white/5 neon-border-purple flex flex-col justify-between group relative"
+    >
       {/* Animated gradient overlay on hover */}
       <motion.div
         initial={{ opacity: 0 }}
         whileHover={{ opacity: 1 }}
-        className="absolute inset-0 bg-gradient-to-br from-accent-purple/5 to-transparent pointer-events-none z-10"
+        className="absolute inset-0 bg-gradient-to-br from-accent-purple/5 to-transparent pointer-events-none z-10 rounded-xl"
       />
 
-      {/* Image / Drop Zone */}
-      <div
-        className="h-44 bg-gradient-to-br from-darkBg-3 to-darkBg-2 border-b border-white/5 relative overflow-hidden"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
+      {/* Image */}
+      <div className="h-44 bg-gradient-to-br from-darkBg-3 to-darkBg-2 border-b border-white/5 relative overflow-hidden rounded-t-xl">
         <motion.div
           animate={{ backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
           className="absolute inset-0 bg-gradient-to-br from-accent-cyan/5 via-transparent to-accent-purple/5 bg-[length:200%_200%]"
         />
-
-        {imgSrc ? (
+        {proj.image ? (
           <img
-            src={imgSrc}
+            src={proj.image}
             alt={proj.title}
             className="w-full h-full object-cover relative z-10"
+            loading="lazy"
           />
         ) : (
-          <label className="absolute inset-0 flex flex-col items-center justify-center gap-2 cursor-pointer z-20 group/drop">
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/jpg,image/webp,application/pdf"
-              className="hidden"
-              onChange={handleFileInput}
-            />
-            <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <ImageIcon className="w-8 h-8 text-slate-600 group-hover/drop:text-accent-cyan transition-colors duration-300" />
-            </motion.div>
-            <span className="text-[9px] font-mono text-slate-600 group-hover/drop:text-accent-cyan/70 uppercase tracking-wider transition-colors duration-300">
-              Drop image or click to upload
-            </span>
-          </label>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-20">
+            <ImageIcon className="w-8 h-8 text-slate-600" />
+            <span className="text-[9px] font-mono text-slate-600 uppercase tracking-wider">No image</span>
+          </div>
         )}
-
-        {/* Animated corner accents */}
+        {/* Corner accents */}
         <div className="absolute top-2 left-2 w-6 h-6 border-t border-l border-accent-cyan/30 group-hover:border-accent-cyan/70 transition-all duration-300 z-30" />
         <div className="absolute top-2 right-2 w-6 h-6 border-t border-r border-accent-purple/30 group-hover:border-accent-purple/70 transition-all duration-300 z-30" />
         <div className="absolute bottom-2 left-2 w-6 h-6 border-b border-l border-accent-purple/30 group-hover:border-accent-purple/70 transition-all duration-300 z-30" />
@@ -173,101 +169,37 @@ function ProjectCard({ proj, idx, isDragging }) {
               <Github className="w-4 h-4 text-slate-400 group-hover/gh:text-white transition-colors" />
             </a>
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed mb-5">
-            {proj.desc}
-          </p>
+          <p className="text-xs text-slate-400 leading-relaxed mb-5">{proj.desc}</p>
         </div>
 
         <div className="flex flex-wrap gap-2 items-center">
-  {proj.tech.slice(0, 3).map((t, i) => (
-    <motion.span
-      key={i}
-      whileHover={{
-        scale: 1.08,
-        backgroundColor: "rgba(0,229,255,0.15)",
-      }}
-      className="text-[10px] font-mono bg-white/5 px-2 py-1 rounded text-slate-300 border border-white/5"
-    >
-      {t}
-    </motion.span>
-  ))}
+          {proj.tech.slice(0, 3).map((t, i) => (
+            <motion.span
+              key={i}
+              whileHover={{ scale: 1.08, backgroundColor: 'rgba(0,229,255,0.15)' }}
+              className="text-[10px] font-mono bg-white/5 px-2 py-1 rounded text-slate-300 border border-white/5"
+            >
+              {t}
+            </motion.span>
+          ))}
 
-  {proj.tech.length > 3 && (
-    <div className="relative group">
-      <motion.span
-        whileHover={{
-          scale: 1.08,
-          backgroundColor: "rgba(168,85,247,0.15)",
-        }}
-        className="
-          text-[10px]
-          font-mono
-          px-2
-          py-1
-          rounded
-          text-accent-purple
-          border
-          border-accent-purple/30
-          bg-accent-purple/10
-          cursor-pointer
-        "
-      >
-        +{proj.tech.length - 3}
-      </motion.span>
-
-      {/* Cyberpunk Tooltip */}
-      <div
-        className="
-          absolute
-          bottom-full
-          left-0
-          mb-3
-          hidden
-          group-hover:block
-          z-50
-          w-56
-        "
-      >
-        <div
-          className="
-            rounded-xl
-            border
-            border-accent-cyan/30
-            bg-black/95
-            backdrop-blur-xl
-            p-3
-            shadow-[0_0_30px_rgba(0,229,255,0.2)]
-          "
-        >
-          <div className="text-[9px] font-mono uppercase tracking-widest text-accent-cyan mb-2">
-            Tech Stack
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {proj.tech.map((tech, idx) => (
-              <span
-                key={idx}
-                className="
-                  text-[10px]
-                  font-mono
-                  px-2
-                  py-1
-                  rounded
-                  bg-white/5
-                  border
-                  border-white/10
-                  text-slate-300
-                "
+          {proj.tech.length > 3 && (
+            <>
+              <motion.span
+                ref={badgeRef}
+                whileHover={{ scale: 1.08, backgroundColor: 'rgba(168,85,247,0.15)' }}
+                onMouseEnter={() => setTooltipVisible(true)}
+                onMouseLeave={() => setTooltipVisible(false)}
+                className="text-[10px] font-mono px-2 py-1 rounded text-accent-purple border border-accent-purple/30 bg-accent-purple/10 cursor-pointer"
               >
-                {tech}
-              </span>
-            ))}
-          </div>
+                +{proj.tech.length - 3}
+              </motion.span>
+
+              {/* Portal-style tooltip rendered via fixed position */}
+              <TechTooltip tech={proj.tech} anchorRef={badgeRef} visible={tooltipVisible} />
+            </>
+          )}
         </div>
-      </div>
-    </div>
-  )}
-</div>
       </div>
     </motion.div>
   );
@@ -279,7 +211,6 @@ export default function Projects() {
   const rafRef = useRef(null);
   const setWidthRef = useRef(0);
 
-  // Start scrolled to the middle copy so we can loop both directions
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -312,28 +243,22 @@ export default function Projects() {
 
   useEffect(() => {
     rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [tick]);
 
   const scrollByCard = (dir) => {
     const el = scrollRef.current;
     if (!el) return;
     setIsPaused(true);
-
     const card = el.querySelector(':scope > div');
     const cardWidth = card ? card.getBoundingClientRect().width : 340;
     const gap = 24;
     const step = cardWidth + gap;
-
     const startX = el.scrollLeft;
     const targetX = startX + dir * step;
     const duration = 450;
     const startTime = performance.now();
-
     const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-
     const animate = (now) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
@@ -381,8 +306,7 @@ export default function Projects() {
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
             className="text-[10px] font-mono text-slate-500 bg-white/5 px-2.5 py-1 rounded-full ml-auto mr-3"
-          >
-          </motion.span>
+          />
           <div className="flex gap-2">
             <button
               onClick={() => scrollByCard(-1)}

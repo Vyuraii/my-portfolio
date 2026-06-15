@@ -5,7 +5,7 @@ import { playHoverSound } from '../utils/sound';
 
 export default function Contact() {
   const channels = [
-    { icon: <Mail className="w-5 h-5" />, label: "Email", val: "raihanputrapermanaa@gmail.com", href: "mailto:raihanputrapermanaa@gmail.com", color: "hover:border-accent-cyan hover:text-accent-cyan" },
+    { icon: <Mail className="w-5 h-5" />, label: "Email", val: "raihanputrapermanaa@gmail.com", href: "mailto:raihanputrapermanaa@gmail.com?to=raihanputrapermanaa@gmail.com", color: "hover:border-accent-cyan hover:text-accent-cyan" },
     { icon: <Github className="w-5 h-5" />, label: "GitHub", val: "github.com/Vyuraii", href: "https://github.com/Vyuraii", color: "hover:border-white hover:text-white" },
     { icon: <Linkedin className="w-5 h-5" />, label: "LinkedIn", val: "linkedin.com/in/raihan-putra-permana", href: "https://linkedin.com/in/raihan-putra-permana", color: "hover:border-accent-blue hover:text-accent-blue" },
     { icon: <Instagram className="w-5 h-5" />, label: "Instagram", val: "@__rputraaa", href: "https://instagram.com/__rputraaa", color: "hover:border-pink-500 hover:text-pink-500" },

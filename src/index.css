@@ -107,3 +107,26 @@ body {
   background: rgba(0, 229, 255, 0.3);
   color: #fff;
 }
+
+/* ===== Performance optimizations ===== */
+.glass-card {
+  will-change: transform;
+  contain: layout style;
+}
+
+/* Promote background blobs to GPU layer */
+.animate-float-slow,
+.animate-float-delayed {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Reduce backdrop-filter cost on cards that aren't visible */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
